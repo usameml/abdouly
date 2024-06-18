@@ -15,7 +15,11 @@ const customerRoutes = require('./routes/customers');
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+    origin: ["https://abdouly.vercel.app"],
+    methods: ["POST, GET"],
+    credentials: true
+  }));
 
 // Routes
 app.use('/api', authRoutes);
