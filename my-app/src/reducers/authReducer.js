@@ -1,50 +1,65 @@
 const initialState = {
-  isAuthenticated: false,
+  token: localStorage.getItem('token'),
+  isAuthenticated: null,
+  loading: true,
   user: null,
-  loading: false,
-  error: null
+  error: null,
 };
 
-const authReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case 'LOGIN_REQUEST':
-      return {
-        ...state,
-        loading: true
-      };
-    case 'LOGIN_SUCCESS':
-      return {
-        ...state,
-        isAuthenticated: true,
-        loading: false,
-        error: null
-      };
-    case 'LOGIN_FAILURE':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
+export default function (state = initialState, action) {
+  const { type, payload } = action;
+
+  switch (type) {
     case 'USER_LOADED':
       return {
         ...state,
         isAuthenticated: true,
-        user: action.payload,
         loading: false,
-        error: null
+        user: payload,
       };
-    case 'AUTH_ERROR':
-    case 'LOGOUT':
+    case 'REGISTER_SUCCESS':
+    case 'LOGIN_SUCCESS':
+      localStorage.setItem('token', payload.token);
       return {
         ...state,
-        isAuthenticated: false,
-        user: null,
+        ...payload,
+        isAuthenticated: true,
         loading: false,
-        error: null  // تأكد من إعادة تعيين الخطأ أيضًا
+      };
+    case 'REGISTER_FAIL':
+    case 'LOGIN_FAILURE':
+    case 'AUTH_ERROR':
+    case 'LOGOUT':
+      localStorage.removeItem('token');
+      return {
+        ...state,
+        token: null,
+        isAuthenticated: false,
+        loading: false,
+        user: null,
+        error: payload,
+      };
+    case 'VERIFY_SUCCESS':
+      return {
+        ...state,
+        user: { ...state.user, isVerified: true },
+      };
+    case 'VERIFY_FAIL':
+      return {
+        ...state,
+        error: payload,
+      };
+    case 'FETCH_USERS_SUCCESS':
+      return {
+        ...state,
+        users: payload,
+      };
+    case 'FETCH_USERS_FAIL':
+      return {
+        ...state,
+        error: payload,
       };
     default:
       return state;
   }
-};
-
-export default authReducer;
+}

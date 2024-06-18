@@ -22,9 +22,9 @@ const Productforsell = () => {
     fetchProducts();
   }, []);
 
-  const handleSell = (productId) => {
+  const handleSell = (productId, product) => {
     console.log("Product ID in handleSell:", productId); 
-    navigate(`/mainlayout/sellproduct/${productId}`, { state: { productId } }); 
+    navigate(`/mainlayout/sellproduct/${productId}`, { state: { productId, productName: product.name } }); 
   };
 
   return (
@@ -36,7 +36,7 @@ const Productforsell = () => {
         renderItem={product => (
           <List.Item
             actions={[
-              <Button type="primary" onClick={() => handleSell(product._id)}>بيع</Button>
+              <Button type="primary" onClick={() => handleSell(product._id, product)}>بيع</Button>
             ]}
           >
             <List.Item.Meta

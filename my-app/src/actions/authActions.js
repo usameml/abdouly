@@ -7,14 +7,30 @@ export const register = (userData) => async dispatch => {
       type: 'REGISTER_SUCCESS',
       payload: res.data
     });
-    return { success: true };  // رجع نتيجة تحتوي على success
-
+    return { success: true };
   } catch (err) {
     dispatch({
       type: 'REGISTER_FAIL',
       payload: err.response.data
     });
-    return { success: false, error: err.response.data };  // رجع نتيجة تحتوي على success
+    return { success: false, error: err.response.data };
+  }
+};
+
+export const verifyUser = (email, verificationCode) => async dispatch => {
+  try {
+    const res = await axios.post('/api/verify', { email, verificationCode });
+    dispatch({
+      type: 'VERIFY_SUCCESS',
+      payload: res.data
+    });
+    return { success: true };
+  } catch (err) {
+    dispatch({
+      type: 'VERIFY_FAIL',
+      payload: err.response.data
+    });
+    return { success: false, error: err.response.data };
   }
 };
 

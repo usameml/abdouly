@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { AiOutlineDashboard, AiOutlineShoppingCart, AiOutlineForm } from "react-icons/ai";
+import { AiOutlineDashboard, AiOutlineShoppingCart, AiOutlineForm, AiOutlineDollar } from "react-icons/ai";
 import { Layout, Menu, theme } from "antd";
 import { useNavigate, Outlet } from "react-router-dom";
 
@@ -44,9 +44,17 @@ const MainLayout = () => {
               label: "بيع",
               children: [
                 { key: "/mainlayout/productforsell", icon: <AiOutlineShoppingCart className="fs-4" />, label: "بيع منتج" },
+                { key: "/mainlayout/managesales", icon: <AiOutlineDollar className="fs-4" />, label: "إدارة المبيعات" }
               ]
             },    
-            
+            {
+              key: "customers",
+              icon: <AiOutlineForm className="fs-4" />,
+              label: "العملاء",
+              children: [
+                { key: "/mainlayout/managecustomers", icon: <AiOutlineForm className="fs-4" />, label: "إدارة العملاء" },
+              ]
+            },
             {
               key: "users",
               icon: <AiOutlineForm className="fs-4" />,

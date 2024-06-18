@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../actions/authActions';
 import { useNavigate, Link } from 'react-router-dom';
@@ -9,20 +9,26 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Change username to email
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { error, isAuthenticated } = useSelector(state => state.auth);
+  const { error, isAuthenticated, user } = useSelector(state => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.userType === 'user') {
+        navigate('/'); // Normal kullanıcıları ana sayfaya yönlendir
+      } else {
+        navigate('/mainlayout/dashboard'); // Diğer kullanıcıları dashboard'a yönlendir
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(loginUser({ username, password }));
+    dispatch(loginUser({ email, password })); // Change username to email
   };
-
-  if (isAuthenticated) {
-    navigate('/mainlayout/dashboard'); // توجيه المستخدم إلى الصفحة الرئيسية عند تسجيل الدخول بنجاح
-  }
 
   return (
     <Container maxWidth="sm" style={{ direction: 'rtl' }}>
@@ -30,9 +36,9 @@ const Login = () => {
       {error && <Typography color="error">{error}</Typography>}
       <form onSubmit={handleSubmit}>
         <TextField
-          label="اسم المستخدم"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          label="البريد الإلكتروني"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           fullWidth
           margin="normal"
           required

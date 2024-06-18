@@ -7,11 +7,20 @@ const { Content } = Layout;
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [customer, setCustomer] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('cart')) || [];
     setCartItems(items);
+
+    const customerData = JSON.parse(localStorage.getItem('customer'));
+    if (customerData) {
+      console.log('Customer Data:', customerData);
+      setCustomer(customerData);
+    } else {
+      message.error('Customer information is missing.');
+    }
   }, []);
 
   const handleRemove = (index) => {
@@ -23,15 +32,19 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     try {
+      if (!customer || !customer.name || !customer._id) {
+        message.error('Customer information is missing.');
+        return;
+      }
+
       for (const item of cartItems) {
-        const response = await axios.post('/api/sales', {
-          productId: item.productId,
-          price: item.price,
-          size: item.size,
-          weight: item.weight,
-          quantitySold: item.quantitySold
-        });
-        console.log('Checkout response:', response);
+        const saleData = {
+          ...item,
+          customerId: customer._id,
+          customerName: customer.name,
+        };
+        console.log('Sending item:', saleData);
+        await axios.post('http://localhost:3000/api/sales', saleData);
       }
       message.success('تم الدفع بنجاح!');
       localStorage.removeItem('cart');
@@ -56,16 +69,19 @@ const Cart = () => {
               ]}
             >
               <List.Item.Meta
-                title={`معرف المنتج: ${item.productId}`}
-                description={`السعر: ${item.price}, الحجم: ${item.size}, الوزن: ${item.weight}, الكمية المباعة: ${item.quantitySold}`}
+                title={`معرف المنتج: ${item.productId},  اسم المنتج: ${item.productName}`}
+                description={`السعر: ${item.price}, الحجم: ${item.size}, الوزن: ${item.weight}, الكمية المباعة: ${item.quantitySold}, المبلغ المدفوع: ${item.paidAmount}, المبلغ المتبقي: ${item.remainingAmount}`}
               />
             </List.Item>
           )}
         />
-        <Button type="primary" onClick={handleCheckout} style={{ marginTop: '20px' }}>الدفع</Button>
-      </Content>
-    </Layout>
+        <Button type="primary" onClick={handleCheckout}
+ style={{ marginTop: '20px' }}>الدفع</Button>
+    </Content>
+  </Layout>
   );
-};
-
-export default Cart;
+  };
+  
+  export default Cart;
+  
+           

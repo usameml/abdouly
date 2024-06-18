@@ -11,11 +11,12 @@ import Box from '@mui/material/Box';
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
+    email: '',
     password: '',
-    userType: 'product_manager'
+    userType: 'user'
   });
 
-  const { username, password, userType } = formData;
+  const { username, email, password, userType } = formData;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -23,9 +24,9 @@ const Register = () => {
 
   const onSubmit = async e => {
     e.preventDefault();
-    const result = await dispatch(register({ username, password, userType }));
+    const result = await dispatch(register({ username, email, password, userType }));
     if (result.success) {
-      navigate('/login');
+      navigate('/verify-email'); // Kullanıcıyı doğrulama sayfasına yönlendirin
     }
   };
 
@@ -37,6 +38,16 @@ const Register = () => {
           label="اسم المستخدم"
           name="username"
           value={username}
+          onChange={onChange}
+          fullWidth
+          margin="normal"
+          required
+          inputProps={{ style: { textAlign: 'right' } }}
+        />
+        <TextField
+          label="البريد الإلكتروني"
+          name="email"
+          value={email}
           onChange={onChange}
           fullWidth
           margin="normal"

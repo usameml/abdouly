@@ -10,6 +10,7 @@ const app = express();
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const saleRoutes = require('./routes/sales');
+const customerRoutes = require('./routes/customers');
 
 // Middleware
 app.use(bodyParser.json());
@@ -20,6 +21,7 @@ app.use(cors());
 app.use('/api', authRoutes);
 app.use('/api', productRoutes);
 app.use('/api/sales', saleRoutes);
+app.use('/api/customers', customerRoutes);
 
 const PORT = process.env.PORT || 5000;
 

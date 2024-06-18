@@ -1,34 +1,69 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/auth');
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const sendEmail = require('../utils/sendEmail');
 
 const tokenSecret = process.env.TOKEN_SECRET;
 
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit code
+};
+
 const registerUser = async (req, res) => {
-  const { username, password } = req.body; // إزالة userType من body
+  const { username, email, password } = req.body;
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).send('Username already exists');
+      return res.status(409).send('Email already exists');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationCode = generateVerificationCode();
+
     const newUser = new User({
       username,
+      email,
       password: hashedPassword,
+      verificationCode,
+      userType: 'user',
+      isVerified: false
     });
+
     await newUser.save();
-    res.status(201).send('User registered successfully');
+
+    // Send verification email
+    const emailText = `Please verify your email by entering the following code: ${verificationCode}`;
+    await sendEmail(email, 'Email Verification', emailText);
+
+    res.status(201).send('User registered successfully, please check your email for verification code');
   } catch (error) {
     res.status(500).send('Error registering new user');
   }
 };
 
+const verifyUser = async (req, res) => {
+  const { email, verificationCode } = req.body;
+  try {
+    const user = await User.findOne({ email, verificationCode });
+    if (!user) {
+      return res.status(400).send('Invalid verification code');
+    }
+    user.isVerified = true;
+    await user.save();
+    res.status(200).send('User verified successfully');
+  } catch (error) {
+    res.status(500).send('Error verifying user');
+  }
+};
 
 const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body; // Change username to email
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (user && await bcrypt.compare(password, user.password)) {
+      if (!user.isVerified) {
+        return res.status(403).send('Please verify your email before logging in.');
+      }
       const token = jwt.sign(
         { userId: user._id, userType: user.userType },
         tokenSecret,
@@ -76,11 +111,11 @@ const updateUserType = async (req, res) => {
   }
 };
 
-
 module.exports = {
   registerUser,
   loginUser,
   getUserInfo,
   getUsers,
-  updateUserType
+  updateUserType,
+  verifyUser
 };
